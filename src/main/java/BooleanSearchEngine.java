@@ -40,30 +40,22 @@ public class BooleanSearchEngine implements SearchEngine {
                     word = word.toLowerCase();
                     freqs.put(word, freqs.getOrDefault(word, 0) + 1);
                 }
-                for (String key : freqs.keySet()) {
-                    int count = freqs.get(key);
-                    PageEntry pageEntry = new PageEntry(pdf.getName(), i, count);
-                    if (wordsOnPage.containsKey(key)) {
-                        wordsOnPage.get(key).add(pageEntry);
-                    } else {
-                        List<PageEntry> list = new ArrayList<>();
-                        list.add(pageEntry);
-                        wordsOnPage.put(key, list);
+                for (Map.Entry<String, Integer> entry : freqs.entrySet()) {
+                    PageEntry pageEntry = new PageEntry(pdf.getName(), i, entry.getValue());
+                    if (!wordsOnPage.containsKey(entry.getKey())) {
+                        wordsOnPage.put(entry.getKey(), new ArrayList<>());
                     }
+                    wordsOnPage.get(entry.getKey()).add(pageEntry);
                 }
             }
+        }
+        for (Map.Entry<String, List<PageEntry>> entry : wordsOnPage.entrySet()) {
+            entry.getValue().sort(PageEntry::compareTo);
         }
     }
 
     @Override
-    public List<PageEntry> search(String words) {
-        String[] input = words.toLowerCase().split(" ");
-
-        List<PageEntry> respond = new ArrayList<>();
-        for (String word : input) {
-            respond.addAll(wordsOnPage.getOrDefault(word, Collections.emptyList()));
-        }
-        Collections.sort(respond);
-        return respond;
+    public List<PageEntry> search(String word) {
+        return this.wordsOnPage.getOrDefault(word.toLowerCase(), Collections.emptyList());
     }
 }
