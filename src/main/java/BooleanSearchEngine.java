@@ -8,8 +8,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static com.itextpdf.kernel.pdf.PdfName.Index;
-
 public class BooleanSearchEngine implements SearchEngine {
     private Map<String, List<PageEntry>> wordsOnPage = new HashMap<>();
     private static Set<String> stopList = new HashSet<>();
@@ -31,7 +29,7 @@ public class BooleanSearchEngine implements SearchEngine {
         for (var pdf : pdfs) {
             var doc = new PdfDocument(new PdfReader(pdf));
             int pages = doc.getNumberOfPages();
-            for (int i = 1; i < pages; i++) {
+            for (int i = 1; i <= pages; i++) {
                 String text = PdfTextExtractor.getTextFromPage(doc.getPage(i));
                 String[] words = text.split("\\P{IsAlphabetic}+");
                 Map<String, Integer> freqs = new HashMap<>();
@@ -59,13 +57,11 @@ public class BooleanSearchEngine implements SearchEngine {
 
     @Override
     public List<PageEntry> search(String words) {
-        String[] input = words.split(" ");
+        String[] input = words.toLowerCase().split(" ");
 
         List<PageEntry> respond = new ArrayList<>();
         for (String word : input) {
-            if (wordsOnPage.containsKey(word)) {
-                respond.addAll(wordsOnPage.get(word));
-            }
+            respond.addAll(wordsOnPage.getOrDefault(word, Collections.emptyList()));
         }
         Collections.sort(respond);
         return respond;
